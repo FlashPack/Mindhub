@@ -20,23 +20,13 @@
 		$('.drives_checkbox').prop('checked',false);
 		$('.aims_checkbox').prop('checked',false);
 			
-		@foreach($aims as $aim)
-			all_aims[{{$aim->id}}] = {name:"{{__($aim->aim_name)}}",status:1}; //Status: 1=>important, 2=>somehome imoprtant ;
-		@endforeach
-		
-		
-		
-		
-		@foreach($drives as $drive)
-			all_drives[{{$drive->id}}] = {name:"{{__($drive->drive_name)}}",status:1,x:$('#circle_{{$drive->id}}').attr('cx'),y:$('#circle_{{$drive->id}}').attr('cy')}; //Status: 1=>primary, 2=>secondary ;
-		@endforeach
 		
 		$('#svg1').css('height',cvgWidth+'px');
 		;
 		$('button[name="savePDF"]').click(function(){
 			
 			if(typeof scoreBoardID != 'undefined'){
-				window.open('{{config("app.url")}}/pdf/'+scoreBoardID+'/true','_blank');
+				window.open('/pdf/'+scoreBoardID+'/true','_blank');
 			}
 			
 		});
@@ -442,7 +432,7 @@
 				aims:checkedAims,
 				drives:checkedDrives,
 				chartImage:renderedImage.toDataURL(),
-				_token:"{{ csrf_token() }}"
+				_token:__csrf_token
 			};
 			
 			sendAjaxRequest(dataObj)
@@ -471,8 +461,8 @@
 				success:function(response){
 					if(response.status=='success'){
 						scoreBoardID = response.id;
-						fbURL = 'http://www.facebook.com/sharer.php?u={{ config("app.url") }}/db/'+scoreBoardID+' &t={{__("Analyse yourself and others today")}}';
-						twitterURL = 'http://twitter.com/share?text={{__("Analyse yourself and others today")}}&url={{ config("app.url") }}/db/'+scoreBoardID;
+						fbURL = 'http://www.facebook.com/sharer.php?u=/db/'+scoreBoardID+' &t=Analyse yourself and others today';
+						twitterURL = 'http://twitter.com/share?text=Analyse yourself and others today&url=/db/'+scoreBoardID;
 						$('.fb-share-link').attr('href',fbURL);
 						$('.twitter-share-link').attr('href',twitterURL);
 					}
@@ -480,25 +470,7 @@
 			});
 		}
 		
-		@if(isset($testerData->drives->primary))
-			
-			@if(isset($testerData->aims))
-				@foreach($testerData->aims as $aim)
-					checkedAims.push( {{ $aim }} ); 
-				@endforeach
-			@endif 
-			
-			@foreach($testerData->drives->primary as $drive)
-				checkedDrives.primary.push( {{ $drive }} ); 
-			@endforeach
-			@if(isset($testerData->drives->secondary))
-				@foreach($testerData->drives->secondary as $drive)
-					checkedDrives.secondary.push( {{ $drive }} ); 
-				@endforeach
-			@endif
-			view_chart();
-		@endif;
-		@if($pdf)
+		function generatePDF(){
 			imageWidth = Math.floor(60*cvgWidth/100);
 			renderedImage = renderSVG(imageWidth,imageWidth);
 			$('#svg1').remove(); 
@@ -506,12 +478,12 @@
 			var content = document.getElementById('page-board');
 			html2pdf().from(content).set({
 			  margin: 1,
-			  filename: $('.name-input').val() + ' {{__("Score Board")}}.pdf',
+			  filename: $('.name-input').val() + 'Score Board.pdf',
 			  html2canvas: { scale: 2 },
 			  jsPDF: {orientation: 'portrait', unit: 'in', format: 'letter', compressPDF: true}
 			}).save();
 			$('.test-container').hide();
-		@endif
+		}
 		
 		
 		
